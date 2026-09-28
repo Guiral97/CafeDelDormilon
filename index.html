@@ -180,8 +180,8 @@ const grams = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*(SIZES[i.tam]||0),
 let orders = [], filter = "activos", editing = null, db = null;
 
 /* ---------- configuración: pega aquí los datos de tu proyecto Supabase ---------- */
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
-const SUPABASE_ANON_KEY = "TU-ANON-KEY";
+const SUPABASE_URL = "https://ujpkqkcejchggctibewk.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_CATyhK3BlNjLvEDoQXWXbw_oxcPn8GU";
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const toRow = o => ({id:o.id, cliente:o.cliente, tel:o.tel||"", fecha:o.fecha||null, notas:o.notas||"",
