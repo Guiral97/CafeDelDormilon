@@ -181,11 +181,13 @@ let orders = [], filter = "activos", editing = null, db = null;
 
 /* ---------- configuración: pega aquí los datos de tu proyecto Supabase ---------- */
 const SUPABASE_URL = "https://ujpkqkcejchggctibewk.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_CATyhK3BlNjLvEDoQXWXbw_oxcPn8GU";
+const SUPABASE_ANON_KEY = "https://ujpkqkcejchggctibewk.supabase.co";
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const toRow = o => ({id:o.id, cliente:o.cliente, tel:o.tel||"", fecha:o.fecha||null, notas:o.notas||"",
-  pagado:!!o.pagado, estado:o.estado, items:o.items, creado:o.creado});
+  pagado:!!o.pagado, estado:o.estado, items:o.items, creado:o.creado,
+  ultimo_cambio_via:"app", ultimo_cambio_por:me});
+let me = null;
 const fromRow = r => ({...r, fecha:r.fecha||"", tel:r.tel||"", notas:r.notas||""});
 function flash(msg){ $("#sync").textContent = msg; }
 
@@ -234,8 +236,9 @@ function showApp(on){
   $("#login").hidden = on; $("#app").hidden = !on; $("#nuevo").hidden = !on;
   if(on && !started){ started = true; loadAll(); subscribe(); }
 }
-sb.auth.getSession().then(({data}) => showApp(!!data.session));
-sb.auth.onAuthStateChange(ev => {
+sb.auth.getSession().then(({data}) => { me = data.session?.user?.email || null; showApp(!!data.session); });
+sb.auth.onAuthStateChange((ev, session) => {
+  if(session) me = session.user.email;
   if(ev==="SIGNED_IN") showApp(true);
   if(ev==="SIGNED_OUT") location.reload();
 });
