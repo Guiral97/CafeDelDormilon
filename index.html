@@ -181,7 +181,7 @@ let orders = [], filter = "activos", editing = null, db = null;
 
 /* ---------- configuración: pega aquí los datos de tu proyecto Supabase ---------- */
 const SUPABASE_URL = "https://ujpkqkcejchggctibewk.supabase.co";
-const SUPABASE_ANON_KEY = "https://ujpkqkcejchggctibewk.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_CATyhK3BlNjLvEDoQXWXbw_oxcPn8GU";
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const toRow = o => ({id:o.id, cliente:o.cliente, tel:o.tel||"", fecha:o.fecha||null, notas:o.notas||"",
