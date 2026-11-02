@@ -51,6 +51,10 @@ body:has(#login:not([hidden])){background:var(--band)}
 .top h1{font:400 clamp(1.45rem,5.5vw,1.9rem)/1.1 "Young Serif",Georgia,serif;margin:0;letter-spacing:-.01em}
 .top .sub{margin:2px 0 0;color:var(--band-muted);font-size:.88rem;font-weight:500}
 .top .sub span::first-letter{text-transform:uppercase}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--tile);border-radius:14px;padding:4px}
+.view{min-height:42px;border:0;border-radius:10px;background:transparent;color:var(--band-muted);font:700 .95rem Figtree,sans-serif;cursor:pointer}
+.view[aria-pressed="true"]{background:var(--band-ink);color:var(--band)}
+.view:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:var(--tile);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat .k{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--band-muted)}
@@ -86,6 +90,11 @@ body:has(#login:not([hidden])){background:var(--band)}
 .items{margin:0;padding:10px 12px;list-style:none;background:var(--soft);border-radius:12px;font-size:.95rem;display:grid;gap:6px}
 .items li{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .items .mol{color:var(--muted);font-size:.88rem;white-space:nowrap}
+.profit{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;font-size:.88rem;color:var(--muted);font-weight:600}
+.profit b{color:var(--green)}
+.profit b.neg,.gain.neg{color:var(--ember)}
+.gain{font-size:.88rem;font-weight:700;color:var(--green);margin:10px 0 0}
+.gain:empty{display:none}
 .note{font-size:.9rem;color:var(--muted);margin:0;display:flex;gap:6px}
 .note svg{flex:none;margin-top:3px}
 /* escala de tostión: el elemento propio de la marca */
@@ -120,7 +129,7 @@ dialog{border:0;border-radius:24px;padding:0;width:min(560px,calc(100% - 20px));
 dialog::backdrop{background:rgba(20,12,8,.55)}
 @media (max-width:600px){dialog{width:100%;max-width:100%;height:100%;max-height:100%;margin:0;border-radius:0}}
 form{padding:20px 18px}
-#form{padding:0;display:flex;flex-direction:column;gap:14px;min-height:100%}
+#form,#aform{padding:0;display:flex;flex-direction:column;gap:14px;min-height:100%}
 .dhead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px 16px 0}
 .dhead h2{font:400 1.6rem "Young Serif",Georgia,serif;margin:0}
 .dbody{padding:0 16px;display:flex;flex-direction:column;gap:14px}
@@ -131,12 +140,15 @@ input:not([type=radio]):not([type=checkbox]),select,textarea{width:100%;min-heig
 textarea{min-height:76px;resize:vertical}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .two input{min-width:0}
-#lines{display:flex;flex-direction:column;gap:14px;counter-reset:linea}
+#lines,#alines{display:flex;flex-direction:column;gap:14px;counter-reset:linea}
 .line{counter-increment:linea}
 .lhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .lhead h3::after{content:" " counter(linea)}
 .lhead .rm{min-height:36px;padding:0 10px}
 .seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.newsize{min-height:36px;padding:0 4px;margin-top:6px;font-size:.88rem}
+.sizeadd{display:flex;gap:8px;margin-top:8px}
+.sizeadd input{flex:1;min-width:0}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
 .opt{position:relative;margin:0;font-weight:inherit}
 .opt input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
@@ -212,14 +224,18 @@ textarea{min-height:76px;resize:vertical}
           <p class="sub">Pedidos · <span id="hoy"></span></p>
         </div>
       </div>
+      <div class="views" role="toolbar" aria-label="Qué estás viendo">
+        <button class="view" data-v="cafe" aria-pressed="true">Café</button>
+        <button class="view" data-v="acc" aria-pressed="false">Accesorios e insumos</button>
+      </div>
       <div class="stats" aria-live="polite">
         <div class="stat">
-          <span class="k">Por tostar</span>
+          <span class="k" id="st-k1">Por tostar</span>
           <span class="v" id="st-kg">0 kg</span>
           <span class="s" id="st-kg-s"></span>
         </div>
         <div class="stat hot">
-          <span class="k">Te deben</span>
+          <span class="k" id="st-k2">Te deben</span>
           <span class="v" id="st-debe">$0</span>
           <span class="s" id="st-debe-s"></span>
         </div>
@@ -232,12 +248,19 @@ textarea{min-height:76px;resize:vertical}
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
       <input class="search" id="q" type="search" placeholder="Buscar cliente o producto" aria-label="Buscar">
     </label>
-    <div class="tabs" role="toolbar" aria-label="Filtrar pedidos">
+    <div class="tabs" id="tabs-cafe" role="toolbar" aria-label="Filtrar pedidos">
       <button class="tab" data-f="activos" aria-pressed="true">Activos <span class="n" data-n="activos"></span></button>
       <button class="tab" data-f="cobrar" aria-pressed="false">Por cobrar <span class="n" data-n="cobrar"></span></button>
       <button class="tab" data-f="entregados" aria-pressed="false">Entregados <span class="n" data-n="entregados"></span></button>
       <button class="tab" data-f="anulados" aria-pressed="false">Anulados <span class="n" data-n="anulados"></span></button>
       <button class="tab" data-f="todos" aria-pressed="false">Todos <span class="n" data-n="todos"></span></button>
+    </div>
+    <div class="tabs" id="tabs-acc" role="toolbar" aria-label="Filtrar accesorios" hidden>
+      <button class="tab" data-f="activos" aria-pressed="true">Activos <span class="n" data-n="activos"></span></button>
+      <button class="tab" data-f="cobrar" aria-pressed="false">Por cobrar <span class="n" data-n="cobrar"></span></button>
+      <button class="tab" data-f="entregados" aria-pressed="false">Entregados <span class="n" data-n="entregados"></span></button>
+      <button class="tab" data-f="anulados" aria-pressed="false">Anulados <span class="n" data-n="anulados"></span></button>
+      <button class="tab" data-f="historial" aria-pressed="false">Historial de productos <span class="n" data-n="historial"></span></button>
     </div>
     <section class="list" id="list" aria-live="polite"></section>
     <p class="sync"><span id="sync">Conectando…</span><br><button class="linkbtn" id="logout">Cerrar sesión</button></p>
@@ -289,8 +312,50 @@ textarea{min-height:76px;resize:vertical}
     </div>
   </form>
 </dialog>
+<dialog id="adlg">
+  <form id="aform" method="dialog">
+    <div class="dhead">
+      <h2 id="atitle">Nuevo pedido</h2>
+      <button type="button" class="btn icon ghost" id="acancel" aria-label="Cancelar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="dbody">
+      <section class="sec">
+        <h3>Cliente</h3>
+        <label for="a-cliente">Nombre</label>
+        <input id="a-cliente" autocomplete="off" list="dl-clientes" placeholder="Déjalo vacío si es para la tienda">
+        <div class="two">
+          <div><label for="a-tel">Celular</label><input id="a-tel" type="tel" inputmode="tel" placeholder="300 123 4567"></div>
+          <div><label for="a-fecha">Entrega</label><input id="a-fecha" type="date"></div>
+        </div>
+      </section>
+      <div id="alines"></div>
+      <button type="button" class="btn dashed" id="aaddline">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Agregar otro producto
+      </button>
+      <section class="sec">
+        <h3>Detalles</h3>
+        <label for="a-notas">Notas</label>
+        <textarea id="a-notas" placeholder="Color, referencia, cuándo llega del proveedor…"></textarea>
+        <label class="check"><span><b>Ya pagó</b><small>Si no, queda en «Por cobrar»</small></span><input type="checkbox" id="a-pagado" role="switch"></label>
+      </section>
+    </div>
+    <div class="danger">
+      <button type="button" class="btn ghost" id="adel" hidden>Eliminar</button>
+      <button type="button" class="btn" id="avoid" hidden>Anular pedido</button>
+    </div>
+    <div class="formfoot">
+      <div class="ftot"><span class="k" id="again">Total</span><span class="formtotal" id="atotal">$0</span></div>
+      <button type="submit" class="btn primary">Guardar pedido</button>
+    </div>
+  </form>
+</dialog>
 <datalist id="dl-clientes"></datalist>
 <datalist id="dl-productos"></datalist>
+<datalist id="dl-acc-prod"></datalist>
+<datalist id="dl-prov"></datalist>
 
 <script>
 const STAGES = [
@@ -319,9 +384,14 @@ const uid = () => crypto.randomUUID();
 const today = () => new Date().toISOString().slice(0,10);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const total = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*(+i.precio||0),0);
-const grams = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*(SIZES[i.tam]||0),0);
+// gramos de una presentación: las fijas por tabla, las creadas ("125 g", "1,5 kg") leyendo el texto
+const gramsOf = t => { if(SIZES[t]) return SIZES[t];
+  const m = /([\d.,]+)\s*(kg|g)\b/i.exec(t||""); return m ? Math.round(parseFloat(m[1].replace(",","."))*(m[2].toLowerCase()==="kg"?1000:1)) : 0; };
+const grams = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*gramsOf(i.tam),0);
 
 let orders = [], filter = "activos", editing = null, db = null;
+let accs = [], accFilter = "activos", accEditing = null, view = "cafe";
+try{ if(localStorage.getItem("vista")==="acc") view = "acc"; }catch{}
 
 $("#hoy").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"});
 
@@ -358,6 +428,45 @@ async function removeOrder(id){
   if(error){ flash("No se pudo eliminar: " + error.message); return; }
   orders = orders.filter(o=>o.id!==id); render();
 }
+/* accesorios e insumos: tabla aparte para no mezclarse con los kilos por tostar ni con el bot */
+let accErr = "";
+const toAccRow = o => ({id:o.id, cliente:o.cliente||"", tel:o.tel||"", fecha:o.fecha||null, notas:o.notas||"",
+  pagado:!!o.pagado, estado:o.estado, items:o.items, creado:o.creado, ultimo_cambio_por:me});
+async function loadAcc(){
+  const {data, error} = await sb.from("accesorios").select("*").order("creado",{ascending:false}).limit(1000);
+  if(error){ accErr = error.message; render(); return; }
+  accErr = ""; accs = data.map(fromRow); render();
+}
+async function persistAcc(o){
+  const i = accs.findIndex(x=>x.id===o.id), prev = i>=0 ? accs[i] : null;
+  if(i>=0) accs[i] = o; else accs.unshift(o);
+  render();
+  const {error} = await sb.from("accesorios").upsert(toAccRow(o));
+  if(error){
+    flash("No se pudo guardar: " + error.message);
+    if(prev) accs[i] = prev; else accs = accs.filter(x=>x.id!==o.id);
+    render();
+  }
+}
+async function removeAcc(id){
+  const {error} = await sb.from("accesorios").delete().eq("id", id);
+  if(error){ flash("No se pudo eliminar: " + error.message); return; }
+  accs = accs.filter(o=>o.id!==id); render();
+}
+function subscribeAcc(){
+  // canal propio: si la tabla aún no existe, el de café sigue funcionando
+  sb.channel("accesorios-live")
+    .on("postgres_changes", {event:"*", schema:"public", table:"accesorios"}, p=>{
+      if(p.eventType==="DELETE") accs = accs.filter(o=>o.id!==p.old.id);
+      else {
+        const r = fromRow(p.new), i = accs.findIndex(o=>o.id===r.id);
+        if(i>=0) accs[i] = r; else accs.unshift(r);
+      }
+      render();
+    })
+    .subscribe();
+}
+
 let channel = null;
 function subscribe(){
   if(channel) return;
@@ -380,7 +489,7 @@ function subscribe(){
 let started = false;
 function showApp(on){
   $("#login").hidden = on; $("#app").hidden = !on; $("#nuevo").hidden = !on;
-  if(on && !started){ started = true; loadAll(); subscribe(); }
+  if(on && !started){ started = true; loadAll(); subscribe(); loadAcc(); subscribeAcc(); }
 }
 sb.auth.getSession().then(({data}) => { me = data.session?.user?.email || null; showApp(!!data.session); });
 sb.auth.onAuthStateChange((ev, session) => {
@@ -397,7 +506,18 @@ $("#loginform").addEventListener("submit", async e=>{
 $("#logout").onclick = ()=>sb.auth.signOut();
 
 /* ---------- render ---------- */
-function render(){
+function render(){ view==="acc" ? renderAcc() : renderCafe(); }
+function fillLists(){
+  const cl = [...new Set([...orders, ...accs].map(o=>o.cliente).filter(Boolean))];
+  $("#dl-clientes").innerHTML = cl.map(c=>`<option value="${esc(c)}">`).join("");
+  const pr = [...new Set(orders.flatMap(o=>(o.items||[]).map(i=>i.prod)).filter(Boolean))];
+  $("#dl-productos").innerHTML = pr.map(p=>`<option value="${esc(p)}">`).join("");
+  $("#dl-acc-prod").innerHTML = catalog().map(c=>`<option value="${esc(c.prod)}">`).join("");
+  const pv = [...new Set(accs.flatMap(o=>(o.items||[]).map(i=>i.prov)).filter(Boolean))];
+  $("#dl-prov").innerHTML = pv.map(p=>`<option value="${esc(p)}">`).join("");
+}
+function renderCafe(){
+  $("#st-k1").textContent = "Por tostar"; $("#st-k2").textContent = "Te deben";
   const pend = orders.filter(o=>o.estado==="nuevo");
   const g = pend.reduce((a,o)=>a+grams(o),0);
   const verde = g/(1-LOSS);
@@ -421,7 +541,7 @@ function render(){
     else if(o.estado==="anulado") cnt.anulados++;
     else cnt.activos++;
   });
-  document.querySelectorAll(".tab .n").forEach(s=>{ s.textContent = cnt[s.dataset.n] || ""; });
+  document.querySelectorAll("#tabs-cafe .n").forEach(s=>{ s.textContent = cnt[s.dataset.n] || ""; });
 
   const q = $("#q").value.trim().toLowerCase();
   let list = orders.filter(o=>{
@@ -442,12 +562,7 @@ function render(){
       ? `<div class="empty"><p>No hay pedidos en esta vista.</p></div>`
       : `<div class="empty"><p>Todavía no hay pedidos. Registra el primero y lleva la cuenta desde aquí.</p><button class="btn primary" onclick="openForm()">Registrar primer pedido</button></div>`;
   } else el.innerHTML = list.map(card).join("");
-
-  // autocomplete sources
-  const cl = [...new Set(orders.map(o=>o.cliente).filter(Boolean))];
-  $("#dl-clientes").innerHTML = cl.map(c=>`<option value="${esc(c)}">`).join("");
-  const pr = [...new Set(orders.flatMap(o=>(o.items||[]).map(i=>i.prod)).filter(Boolean))];
-  $("#dl-productos").innerHTML = pr.map(p=>`<option value="${esc(p)}">`).join("");
+  fillLists();
 }
 
 function itemsHTML(o){
@@ -518,6 +633,16 @@ function markPaid(id){
 /* ---------- form ---------- */
 let lineSeq = 0;
 function optsWith(list, sel){ return list.includes(sel) ? list : [...list, sel]; }
+// presentaciones fijas + las que ya se han usado en pedidos (así una creada queda para la próxima)
+function allSizes(){
+  const used = orders.flatMap(o=>(o.items||[]).map(i=>LEGACY[i.tam]||i.tam)).filter(t=>t && !SIZE_OPTS.includes(t) && gramsOf(t));
+  return [...SIZE_OPTS, ...new Set(used)].sort((a,b)=>gramsOf(a)-gramsOf(b));
+}
+const sizeName = g => g>=1000 && g%100===0 ? `${String(g/1000).replace(".",",")} kg` : `${g} g`;
+function sizeOpt(s, n, sel){
+  const [a,b] = SIZE_LABEL[s] || [s,""];
+  return `<label class="opt"><input type="radio" class="l-tam" name="tam-${n}" value="${esc(s)}" ${s===sel?"checked":""}><span><b>${esc(a)}</b>${b?`<small>${b}</small>`:""}</span></label>`;
+}
 function lineHTML(it={}){
   const n = ++lineSeq;
   const tam = LEGACY[it.tam]||it.tam||"Libra (500 g)";
@@ -530,10 +655,12 @@ function lineHTML(it={}){
     <label for="l-prod-${n}">Producto</label>
     <input id="l-prod-${n}" class="l-prod" list="dl-productos" value="${esc(it.prod||"")}" placeholder="Nombre del café o finca">
     <span class="lbl" id="l-tam-${n}">Presentación</span>
-    <div class="seg" role="radiogroup" aria-labelledby="l-tam-${n}">${optsWith(SIZE_OPTS,tam).map(s=>{
-      const [a,b] = SIZE_LABEL[s] || [s,""];
-      return `<label class="opt"><input type="radio" class="l-tam" name="tam-${n}" value="${esc(s)}" ${s===tam?"checked":""}><span><b>${esc(a)}</b>${b?`<small>${b}</small>`:""}</span></label>`;
-    }).join("")}</div>
+    <div class="seg" role="radiogroup" aria-labelledby="l-tam-${n}">${optsWith(allSizes(),tam).map(s=>sizeOpt(s,n,tam)).join("")}</div>
+    <button type="button" class="btn ghost newsize" data-n="${n}">+ Otra presentación</button>
+    <div class="sizeadd" hidden>
+      <input class="l-newg" type="number" min="1" step="1" inputmode="numeric" placeholder="Gramos, ej: 125" aria-label="Gramos de la nueva presentación">
+      <button type="button" class="btn addsize">Agregar</button>
+    </div>
     <span class="lbl" id="l-mol-${n}">Molienda</span>
     <div class="pills" role="radiogroup" aria-labelledby="l-mol-${n}">${optsWith(GRINDS,mol).map(s=>
       `<label class="opt"><input type="radio" class="l-mol" name="mol-${n}" value="${esc(s)}" ${s===mol?"checked":""}><span>${esc(GRIND_LABEL[s]||s)}</span></label>`
@@ -563,7 +690,7 @@ function readLines(){
 }
 function calcTotal(){
   const ls = readLines();
-  const g = ls.reduce((a,i)=>a+i.cant*(SIZES[i.tam]||0),0);
+  const g = ls.reduce((a,i)=>a+i.cant*gramsOf(i.tam),0);
   $("#ftotal").textContent = money(ls.reduce((a,i)=>a+i.cant*i.precio,0));
   $("#fkg").textContent = g ? `Total · ${kg(g)} kg` : "Total";
 }
@@ -585,7 +712,28 @@ $("#lines").addEventListener("change",e=>{
   calcTotal();
 });
 $("#lines").addEventListener("input",calcTotal);
+function addSize(l){
+  const g = Math.round(+l.querySelector(".l-newg").value);
+  if(!(g>0)){ l.querySelector(".l-newg").focus(); return; }
+  const name = sizeName(g), seg = l.querySelector(".seg");
+  let r = [...seg.querySelectorAll(".l-tam")].find(x=>gramsOf(x.value)===g);
+  if(!r){
+    seg.insertAdjacentHTML("beforeend", sizeOpt(name, l.querySelector(".newsize").dataset.n, name));
+    r = seg.lastElementChild.querySelector("input");
+  }
+  r.checked = true;
+  l.querySelector(".sizeadd").hidden = true; l.querySelector(".newsize").hidden = false;
+  l.querySelector(".l-newg").value = "";
+  r.dispatchEvent(new Event("change",{bubbles:true}));
+  r.focus();
+}
+$("#lines").addEventListener("keydown",e=>{
+  if(e.key==="Enter" && e.target.matches(".l-newg")){ e.preventDefault(); addSize(e.target.closest(".line")); }
+});
 $("#lines").addEventListener("click",e=>{
+  const ns = e.target.closest(".newsize");
+  if(ns){ const l = ns.closest(".line"); ns.hidden = true; l.querySelector(".sizeadd").hidden = false; l.querySelector(".l-newg").focus(); return; }
+  if(e.target.closest(".addsize")){ addSize(e.target.closest(".line")); return; }
   const b = e.target.closest(".step"); if(!b) return;
   const inp = b.parentElement.querySelector(".l-cant");
   inp.value = Math.max(1, (+inp.value||1) + (+b.dataset.d));
@@ -613,7 +761,6 @@ function openForm(id){
   $("#dlg").showModal();
   if(!editing) $("#f-cliente").focus();
 }
-$("#nuevo").onclick = ()=>openForm();
 $("#addline").onclick = ()=>{ $("#lines").insertAdjacentHTML("beforeend", lineHTML()); calcTotal(); };
 $("#fcancel").onclick = ()=>$("#dlg").close();
 $("#fdel").onclick = ()=>{
@@ -644,13 +791,321 @@ $("#form").addEventListener("submit",e=>{
   $("#dlg").close();
 });
 
+/* ---------- accesorios e insumos (bajo pedido a proveedores) ---------- */
+const ACC_STAGES = [
+  {k:"por_pedir", label:"Por pedir al proveedor",        next:"Ya lo pedí"},
+  {k:"pedido",    label:"Pedido al proveedor",           next:"Marcar recibido"},
+  {k:"recibido",  label:"Recibido, listo para entregar", next:"Marcar entregado"},
+  {k:"entregado", label:"Entregado",                     next:null}
+];
+const CATS = ["Métodos de preparación","Accesorios","Insumos"];
+const CAT_LABEL = {"Métodos de preparación":"Métodos","Accesorios":"Accesorios","Insumos":"Insumos"};
+const DEF_MARGIN = 30;
+// margen sobre el precio de venta: precio = costo / (1 − margen); se redondea hacia arriba a $100
+const priceFor = (c,m) => c>0 && m>=0 && m<100 ? Math.ceil(c/(1-m/100)/100)*100 : 0;
+const marginFor = (c,p) => p>0 ? Math.round((p-c)/p*1000)/10 : 0;
+const pct = n => n.toLocaleString("es-CO",{maximumFractionDigits:1}) + " %";
+const accSale = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*(+i.precio||0),0);
+const accCost = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*(+i.costo||0),0);
+const keyOf = p => (p||"").trim().toLowerCase();
+
+// historial: la última versión de cada producto pedido (costo, margen, proveedor), para repetirlo
+let lastCatalog = [];
+function catalog(){
+  const map = new Map();
+  [...accs].filter(o=>o.estado!=="anulado").sort((a,b)=>(a.creado||"").localeCompare(b.creado||"")).forEach(o=>
+    (o.items||[]).forEach(i=>{
+      const k = keyOf(i.prod); if(!k) return;
+      const prev = map.get(k);
+      map.set(k, {...i, veces:(prev?.veces||0)+1, unidades:(prev?.unidades||0)+(+i.cant||0), ultimo:o.creado||""});
+    }));
+  return [...map.values()].sort((a,b)=>b.ultimo.localeCompare(a.ultimo));
+}
+
+function renderAcc(){
+  $("#st-k1").textContent = "Por pedir"; $("#st-k2").textContent = "Ganancia del mes";
+  const porPedir = accs.filter(o=>o.estado==="por_pedir");
+  const unid = porPedir.reduce((a,o)=>a+(o.items||[]).reduce((b,i)=>b+(+i.cant||0),0),0);
+  const provs = new Set(porPedir.flatMap(o=>(o.items||[]).map(i=>i.prov||"Sin proveedor")));
+  const mes = accs.filter(o=>o.estado!=="anulado" && (o.creado||"").slice(0,7)===today().slice(0,7));
+  const gan = mes.reduce((a,o)=>a+accSale(o)-accCost(o),0), venta = mes.reduce((a,o)=>a+accSale(o),0);
+  const porCobrar = accs.filter(o=>!o.pagado && o.estado!=="anulado");
+  lastCatalog = catalog();
+
+  $("#st-kg").textContent = `${unid} ${unid===1?"unidad":"unidades"}`;
+  $("#st-kg-s").textContent = unid ? `a ${provs.size} ${provs.size===1?"proveedor":"proveedores"}` : "Nada pendiente por pedir";
+  $("#st-debe").textContent = money(gan);
+  $("#st-debe-s").textContent = mes.length ? `${mes.length} ${mes.length===1?"pedido":"pedidos"} · ${money(venta)} en ventas` : "Aún no hay ventas este mes";
+
+  const cnt = {activos:0, cobrar:porCobrar.length, entregados:0, anulados:0, historial:lastCatalog.length};
+  accs.forEach(o=>{
+    if(o.estado==="entregado") cnt.entregados++;
+    else if(o.estado==="anulado") cnt.anulados++;
+    else cnt.activos++;
+  });
+  document.querySelectorAll("#tabs-acc .n").forEach(s=>{ s.textContent = cnt[s.dataset.n] || ""; });
+
+  const q = $("#q").value.trim().toLowerCase(), el = $("#list");
+  if(accErr){
+    el.innerHTML = `<div class="empty"><p>No se pudieron cargar los accesorios: ${esc(accErr)}</p><p>Si es la primera vez, falta crear la tabla «accesorios» en Supabase (archivo supabase/accesorios.sql).</p></div>`;
+    fillLists(); return;
+  }
+  if(accFilter==="historial"){
+    const cs = lastCatalog.map((c,i)=>[c,i]).filter(([c])=>!q || (c.prod+" "+(c.prov||"")+" "+(c.cat||"")).toLowerCase().includes(q));
+    el.innerHTML = cs.length ? cs.map(([c,i])=>catCard(c,i)).join("")
+      : `<div class="empty"><p>${lastCatalog.length?"Ningún producto coincide.":"Cada producto que registres en un pedido queda aquí, con su costo, margen y proveedor, para pedirlo otra vez."}</p></div>`;
+    fillLists(); return;
+  }
+  const list = accs.filter(o=>{
+    if(accFilter==="activos" && (o.estado==="entregado" || o.estado==="anulado")) return false;
+    if(accFilter==="entregados" && o.estado!=="entregado") return false;
+    if(accFilter==="cobrar" && (o.pagado || o.estado==="anulado")) return false;
+    if(accFilter==="anulados" && o.estado!=="anulado") return false;
+    if(!q) return true;
+    return ((o.cliente||"")+" "+(o.items||[]).map(i=>i.prod+" "+(i.prov||"")).join(" ")).toLowerCase().includes(q);
+  }).sort((a,b)=> accFilter==="activos"||accFilter==="cobrar"
+    ? (a.fecha||"9999").localeCompare(b.fecha||"9999")
+    : (b.creado||"").localeCompare(a.creado||""));
+  el.innerHTML = list.length ? list.map(accCard).join("")
+    : accs.length ? `<div class="empty"><p>No hay pedidos en esta vista.</p></div>`
+    : `<div class="empty"><p>Registra aquí métodos de preparación, accesorios e insumos que pides a tus proveedores, con lo que te cuestan y en cuánto los vendes.</p><button class="btn primary" onclick="openAccForm()">Registrar primer pedido</button></div>`;
+  fillLists();
+}
+
+function accItemsHTML(o){
+  return `<ul class="items">${(o.items||[]).map(i=>`<li><span><b>${esc(i.cant)}</b> · ${esc(i.prod)}</span><span class="mol">${esc(i.prov||"")}</span></li>`).join("")}</ul>`;
+}
+function profitHTML(o){
+  const c = accCost(o), s = accSale(o), g = s - c;
+  return `<div class="profit"><span>Costo ${money(c)}</span><span>Ganancia <b class="${g<0?"neg":""}">${money(g)}</b> · ${pct(marginFor(c,s))}</span></div>`;
+}
+function accCard(o){
+  const name = o.cliente || "Para la tienda";
+  if(o.estado==="anulado") return `<article class="order void">
+    <div class="ohead"><div class="who"><span class="name">${esc(name)}</span></div><div class="amt"><span class="total">${money(accSale(o))}</span></div></div>
+    ${accItemsHTML(o)}
+    <div class="stage"><span>Anulado</span></div>
+    <div class="actions">
+      <button class="btn grow" onclick="accRestore('${o.id}')">Restaurar pedido</button>
+      <span class="icons"><button class="btn icon" onclick="openAccForm('${o.id}')" aria-label="Editar pedido de ${esc(name)}" title="Editar">${ICON_EDIT}</button></span>
+    </div>
+  </article>`;
+  const si = Math.max(0, ACC_STAGES.findIndex(s=>s.k===o.estado)), st = ACC_STAGES[si];
+  const late = o.fecha && o.fecha < today() && o.estado!=="entregado";
+  const fecha = o.fecha ? new Date(o.fecha+"T12:00").toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"}) : "Sin fecha";
+  const tel = (o.tel||"").replace(/\D/g,"");
+  const wa = tel ? `https://wa.me/${tel.length===10?"57"+tel:tel}` : "";
+  return `<article class="order">
+    <div class="ohead">
+      <div class="who">
+        <span class="name">${esc(name)}</span>
+        <span class="meta ${late?"late":""}">${late?"Atrasado · ":"Entrega · "}${esc(fecha)}</span>
+      </div>
+      <div class="amt">
+        <span class="total">${money(accSale(o))}</span>
+        <span class="paid ${o.pagado?"yes":"no"}">${o.pagado?"Pagado":"Debe"}</span>
+      </div>
+    </div>
+    ${accItemsHTML(o)}
+    ${profitHTML(o)}
+    ${o.notas?`<p class="note">${ICON_NOTE}${esc(o.notas)}</p>`:""}
+    <div class="roast" aria-hidden="true">${ACC_STAGES.map((s,i)=>`<span class="${i<=si?"on":""}"></span>`).join("")}</div>
+    <div class="stage"><span>${st.label}</span><span class="paso">Paso ${si+1} de ${ACC_STAGES.length}</span></div>
+    <div class="actions">
+      ${st.next?`<button class="btn primary grow" onclick="accAdvance('${o.id}')">${st.next}</button>`:""}
+      ${!o.pagado?`<button class="btn ${st.next?"":"grow"}" onclick="accPaid('${o.id}')">Marcar pagado</button>`:""}
+      <span class="icons">
+        ${wa?`<a class="btn icon wa" href="${wa}" target="_blank" rel="noopener" aria-label="Escribir a ${esc(name)} por WhatsApp" title="WhatsApp">${ICON_WA}</a>`:""}
+        <button class="btn icon" onclick="openAccForm('${o.id}')" aria-label="Editar pedido de ${esc(name)}" title="Editar">${ICON_EDIT}</button>
+      </span>
+    </div>
+  </article>`;
+}
+function catCard(c, i){
+  const ult = c.ultimo ? new Date(c.ultimo).toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"}) : "";
+  const g = (+c.precio||0) - (+c.costo||0);
+  return `<article class="order">
+    <div class="ohead">
+      <div class="who">
+        <span class="name">${esc(c.prod)}</span>
+        <span class="meta">${esc(CAT_LABEL[c.cat]||c.cat||"Sin categoría")} · ${esc(c.prov||"Sin proveedor")}</span>
+      </div>
+      <div class="amt"><span class="total">${money(c.precio)}</span><span class="meta">precio venta</span></div>
+    </div>
+    <ul class="items">
+      <li><span>Nos cuesta</span><b>${money(c.costo)}</b></li>
+      <li><span>Margen</span><b>${pct(+c.margen||marginFor(+c.costo||0,+c.precio||0))}</b></li>
+      <li><span>Ganancia por unidad</span><b>${money(g)}</b></li>
+    </ul>
+    <p class="note">Pedido ${c.veces} ${c.veces===1?"vez":"veces"} · ${c.unidades} ${c.unidades===1?"unidad":"unidades"}${ult?` · último el ${esc(ult)}`:""}</p>
+    <div class="actions"><button class="btn primary grow" onclick="reorder(${i})">Pedir otra vez</button></div>
+  </article>`;
+}
+function reorder(i){
+  const c = lastCatalog[i]; if(!c) return;
+  openAccForm(null, {prod:c.prod, cat:c.cat, prov:c.prov, cant:1, costo:c.costo, margen:c.margen, precio:c.precio});
+}
+function accAdvance(id){
+  const o = accs.find(x=>x.id===id); if(!o) return;
+  const i = ACC_STAGES.findIndex(s=>s.k===o.estado);
+  if(i<ACC_STAGES.length-1) persistAcc({...o, estado:ACC_STAGES[i+1].k});
+}
+function accPaid(id){ const o = accs.find(x=>x.id===id); if(o) persistAcc({...o, pagado:true}); }
+function accRestore(id){ const o = accs.find(x=>x.id===id); if(o) persistAcc({...o, estado:"por_pedir"}); }
+
+let alineSeq = 0;
+function alineHTML(it={}){
+  const n = ++alineSeq, cat = it.cat || CATS[0];
+  const margen = it.margen ?? DEF_MARGIN;
+  return `<section class="sec line">
+    <div class="lhead">
+      <h3>Producto</h3>
+      <button type="button" class="btn ghost rm" onclick="this.closest('.line').remove();calcATotal()" aria-label="Quitar producto">Quitar</button>
+    </div>
+    <label for="a-prod-${n}">Producto</label>
+    <input id="a-prod-${n}" class="a-prod" list="dl-acc-prod" required autocomplete="off" value="${esc(it.prod||"")}" placeholder="Ej: Chemex 6 tazas, filtros V60">
+    <span class="lbl" id="a-cat-${n}">Categoría</span>
+    <div class="pills" role="radiogroup" aria-labelledby="a-cat-${n}">${optsWith(CATS,cat).map(s=>
+      `<label class="opt"><input type="radio" class="a-cat" name="cat-${n}" value="${esc(s)}" ${s===cat?"checked":""}><span>${esc(CAT_LABEL[s]||s)}</span></label>`
+    ).join("")}</div>
+    <label for="a-prov-${n}">Proveedor</label>
+    <input id="a-prov-${n}" class="a-prov" list="dl-prov" autocomplete="off" value="${esc(it.prov||"")}" placeholder="¿A quién se lo pedimos?">
+    <div class="two">
+      <div>
+        <label for="a-cant-${n}">Cantidad</label>
+        <div class="stepper">
+          <button type="button" class="step" data-d="-1" aria-label="Quitar uno">−</button>
+          <input id="a-cant-${n}" class="l-cant" type="number" min="1" inputmode="numeric" value="${esc(it.cant||1)}">
+          <button type="button" class="step" data-d="1" aria-label="Agregar uno">+</button>
+        </div>
+      </div>
+      <div><label for="a-costo-${n}">Nos cuesta (unidad)</label><input id="a-costo-${n}" class="a-costo" type="number" min="0" step="100" inputmode="numeric" value="${esc(it.costo||"")}" placeholder="0"></div>
+    </div>
+    <div class="two">
+      <div><label for="a-margen-${n}">Margen %</label><input id="a-margen-${n}" class="a-margen" type="number" min="0" max="95" step="1" inputmode="decimal" value="${esc(margen)}"></div>
+      <div><label for="a-precio-${n}">Precio venta (unidad)</label><input id="a-precio-${n}" class="a-precio" type="number" min="0" step="100" inputmode="numeric" value="${esc(it.precio||"")}" placeholder="0"></div>
+    </div>
+    <p class="gain" aria-live="polite"></p>
+  </section>`;
+}
+function readALines(){
+  return [...document.querySelectorAll("#alines .line")].map(l=>({
+    prod:l.querySelector(".a-prod").value.trim(),
+    cat:pick(l,"a-cat"),
+    prov:l.querySelector(".a-prov").value.trim(),
+    cant:+l.querySelector(".l-cant").value||1,
+    costo:+l.querySelector(".a-costo").value||0,
+    margen:+l.querySelector(".a-margen").value||0,
+    precio:+l.querySelector(".a-precio").value||0
+  }));
+}
+function calcATotal(){
+  const ls = readALines();
+  document.querySelectorAll("#alines .line").forEach((l,k)=>{
+    const i = ls[k], g = i.precio - i.costo, p = l.querySelector(".gain");
+    p.textContent = i.precio ? `Ganas ${money(g)} por unidad${i.cant>1?` · ${money(g*i.cant)} en total`:""}` : "";
+    p.classList.toggle("neg", g<0);
+  });
+  const venta = ls.reduce((a,i)=>a+i.cant*i.precio,0), gan = venta - ls.reduce((a,i)=>a+i.cant*i.costo,0);
+  $("#atotal").textContent = money(venta);
+  $("#again").textContent = venta ? `Total · ganas ${money(gan)}` : "Total";
+}
+$("#alines").addEventListener("input",e=>{
+  const l = e.target.closest(".line"); if(!l) return;
+  const costo = +l.querySelector(".a-costo").value||0, mi = l.querySelector(".a-margen"), pi = l.querySelector(".a-precio");
+  if(e.target.matches(".a-costo,.a-margen")) pi.value = priceFor(costo, +mi.value||0) || "";
+  if(e.target.matches(".a-precio")) mi.value = +pi.value ? marginFor(costo, +pi.value) : mi.value;
+  calcATotal();
+});
+$("#alines").addEventListener("change",e=>{
+  if(!e.target.matches(".a-prod")) return;
+  const l = e.target.closest(".line"), c = lastCatalog.find(x=>keyOf(x.prod)===keyOf(e.target.value));
+  if(!c || l.querySelector(".a-costo").value) return;
+  // producto ya pedido antes: se trae su proveedor, costo y margen
+  const r = [...l.querySelectorAll(".a-cat")].find(x=>x.value===c.cat); if(r) r.checked = true;
+  if(!l.querySelector(".a-prov").value) l.querySelector(".a-prov").value = c.prov||"";
+  l.querySelector(".a-costo").value = c.costo||"";
+  l.querySelector(".a-margen").value = c.margen ?? DEF_MARGIN;
+  l.querySelector(".a-precio").value = c.precio||"";
+  calcATotal();
+});
+$("#alines").addEventListener("click",e=>{
+  const b = e.target.closest(".step"); if(!b) return;
+  const inp = b.parentElement.querySelector(".l-cant");
+  inp.value = Math.max(1, (+inp.value||1) + (+b.dataset.d));
+  calcATotal();
+});
+$("#a-cliente").addEventListener("change",()=>{
+  const prev = [...orders, ...accs].find(o=>o.cliente===$("#a-cliente").value && o.tel);
+  if(prev && !$("#a-tel").value) $("#a-tel").value = prev.tel;
+});
+
+function openAccForm(id, seed){
+  accEditing = id ? accs.find(o=>o.id===id) : null;
+  const o = accEditing || {};
+  lastCatalog = catalog(); fillLists();
+  $("#atitle").textContent = accEditing ? "Editar pedido" : "Nuevo pedido";
+  $("#a-cliente").value = o.cliente||"";
+  $("#a-tel").value = o.tel||"";
+  $("#a-fecha").value = o.fecha||"";
+  $("#a-notas").value = o.notas||"";
+  $("#a-pagado").checked = !!o.pagado;
+  $("#alines").innerHTML = (o.items&&o.items.length ? o.items : [seed||{}]).map(alineHTML).join("");
+  $("#adel").hidden = !accEditing;
+  $("#avoid").hidden = !accEditing;
+  $("#avoid").textContent = accEditing && accEditing.estado==="anulado" ? "Restaurar pedido" : "Anular pedido";
+  calcATotal();
+  $("#adlg").showModal();
+  if(!accEditing) (seed ? $("#a-cliente") : $("#alines .a-prod")).focus();
+}
+$("#aaddline").onclick = ()=>{ $("#alines").insertAdjacentHTML("beforeend", alineHTML()); calcATotal(); };
+$("#acancel").onclick = ()=>$("#adlg").close();
+$("#adel").onclick = ()=>{
+  if(accEditing && confirm(`¿Eliminar para siempre este pedido? No se puede deshacer. Si solo se canceló, mejor usa "Anular pedido".`)){ removeAcc(accEditing.id); $("#adlg").close(); }
+};
+$("#avoid").onclick = ()=>{
+  if(!accEditing) return;
+  if(accEditing.estado==="anulado"){ persistAcc({...accEditing, estado:"por_pedir"}); $("#adlg").close(); return; }
+  if(confirm(`¿Anular este pedido? Queda guardado en "Anulados" y puedes restaurarlo.`)){ persistAcc({...accEditing, estado:"anulado"}); $("#adlg").close(); }
+};
+$("#aform").addEventListener("submit",e=>{
+  e.preventDefault();
+  const items = readALines().filter(i=>i.prod);
+  if(!items.length){ $("#alines").innerHTML = alineHTML(); return; }
+  persistAcc({
+    ...(accEditing||{}),
+    id: accEditing ? accEditing.id : uid(),
+    cliente: $("#a-cliente").value.trim(),
+    tel: $("#a-tel").value.trim(),
+    fecha: $("#a-fecha").value,
+    notas: $("#a-notas").value.trim(),
+    pagado: $("#a-pagado").checked,
+    items,
+    estado: accEditing ? accEditing.estado : "por_pedir",
+    creado: accEditing ? accEditing.creado : new Date().toISOString()
+  });
+  $("#adlg").close();
+});
+
+/* ---------- vistas y filtros ---------- */
+function setView(v){
+  view = v;
+  try{ localStorage.setItem("vista", v); }catch{}
+  document.querySelectorAll(".view").forEach(b=>b.setAttribute("aria-pressed", b.dataset.v===v));
+  $("#tabs-cafe").hidden = v!=="cafe"; $("#tabs-acc").hidden = v!=="acc";
+  $("#q").placeholder = v==="acc" ? "Buscar cliente, producto o proveedor" : "Buscar cliente o producto";
+  render();
+}
+document.querySelectorAll(".view").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+$("#nuevo").onclick = ()=> view==="acc" ? openAccForm() : openForm();
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
-  filter = b.dataset.f;
-  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  const bar = b.parentElement;
+  if(bar.id==="tabs-acc") accFilter = b.dataset.f; else filter = b.dataset.f;
+  bar.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-pressed", x===b));
   render();
 });
 $("#q").addEventListener("input",render);
-render();
+setView(view);
 </script>
 </body>
 </html>
