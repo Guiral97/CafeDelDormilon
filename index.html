@@ -16,6 +16,7 @@
   --ok-bg:#DDE6CC; --ok-ink:#3B5520; --due-bg:#F6D9C6; --due-ink:#8A3510;
   --r1:#7C9A45; --r2:#B8843F; --r3:#6E4026; --r4:#2B1A12;
   --field:#FFFBF4;
+  --c-cafe:#A8461A; --c-acc:#2F6FA8; --c-cli:#9C8670;
   --shadow:0 1px 0 rgba(43,26,18,.04),0 8px 20px -14px rgba(43,26,18,.45);
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -28,6 +29,7 @@
     --band:#120C09; --tile:#2A1E17;
     --ok-bg:#2F3A22; --ok-ink:#BBD392; --due-bg:#4A2716; --due-ink:#F4AC80;
     --field:#221811; --r4:#E8D7BE; --shadow:none;
+    --c-cafe:#D9692A; --c-acc:#4E92D0; --c-cli:#8A7562;
   }
 }
 :root[data-theme="dark"]{
@@ -36,6 +38,7 @@
   --band:#120C09; --tile:#2A1E17;
   --ok-bg:#2F3A22; --ok-ink:#BBD392; --due-bg:#4A2716; --due-ink:#F4AC80;
   --field:#221811; --r4:#E8D7BE; --shadow:none;
+  --c-cafe:#D9692A; --c-acc:#4E92D0; --c-cli:#8A7562;
 }
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
@@ -51,7 +54,7 @@ body:has(#login:not([hidden])){background:var(--band)}
 .top h1{font:400 clamp(1.45rem,5.5vw,1.9rem)/1.1 "Young Serif",Georgia,serif;margin:0;letter-spacing:-.01em}
 .top .sub{margin:2px 0 0;color:var(--band-muted);font-size:.88rem;font-weight:500}
 .top .sub span::first-letter{text-transform:uppercase}
-.views{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--tile);border-radius:14px;padding:4px}
+.views{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--tile);border-radius:14px;padding:4px}
 .view{min-height:42px;border:0;border-radius:10px;background:transparent;color:var(--band-muted);font:700 .95rem Figtree,sans-serif;cursor:pointer}
 .view[aria-pressed="true"]{background:var(--band-ink);color:var(--band)}
 .view:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -95,6 +98,39 @@ body:has(#login:not([hidden])){background:var(--band)}
 .profit b.neg,.gain.neg{color:var(--ember)}
 .gain{font-size:.88rem;font-weight:700;color:var(--green);margin:10px 0 0}
 .gain:empty{display:none}
+/* ---------- métricas ---------- */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0;box-shadow:var(--shadow)}
+.kpi .k,.panel .k{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font:400 clamp(1.3rem,5.5vw,1.6rem)/1.2 "Young Serif",Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .d{font-size:.8rem;font-weight:600;color:var(--muted)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.panel h2{font:400 1.2rem/1.2 "Young Serif",Georgia,serif;margin:0 0 2px}
+.panel .hint{margin:0;color:var(--muted);font-size:.85rem}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:10px 0 4px;font-size:.85rem;font-weight:600;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px}
+.chart{position:relative;margin-top:6px;touch-action:pan-y}
+.chart svg{display:block;width:100%}
+.chart text{font:600 11px Figtree,sans-serif;fill:var(--muted)}
+.tip{position:absolute;top:0;z-index:2;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:12px;padding:8px 12px;font-size:.82rem;line-height:1.45;white-space:nowrap;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.tip b{display:block;font-size:.85rem}
+.tip i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+.panel details{margin-top:10px;font-size:.88rem}
+.panel summary{cursor:pointer;color:var(--muted);font-weight:700;min-height:36px;display:flex;align-items:center}
+.panel table{width:100%;border-collapse:collapse;margin-top:6px;font-variant-numeric:tabular-nums}
+.panel th,.panel td{text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}
+.panel th:first-child,.panel td:first-child{text-align:left}
+.ranks{display:grid;gap:14px}
+@media (min-width:640px){.ranks{grid-template-columns:1fr 1fr}.ranks .panel{margin-bottom:0}}
+.rank{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:12px}
+.rank li{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:.92rem}
+.rank .rn{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank .rv{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.rank .rv small{display:block;color:var(--muted);font-weight:600;font-size:.78rem}
+.rank .bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--soft)}
+.rank .bar span{display:block;height:100%;border-radius:3px;min-width:4px}
+.rank-empty{color:var(--muted);font-size:.9rem;margin:12px 0 0}
 .note{font-size:.9rem;color:var(--muted);margin:0;display:flex;gap:6px}
 .note svg{flex:none;margin-top:3px}
 /* escala de tostión: el elemento propio de la marca */
@@ -221,12 +257,13 @@ textarea{min-height:76px;resize:vertical}
         <svg class="logo" width="36" height="36" viewBox="0 0 34 34" fill="none" aria-hidden="true"><ellipse cx="17" cy="17" rx="10" ry="14" transform="rotate(30 17 17)" stroke="currentColor" stroke-width="2"/><path d="M11 25c5-3 7-13 12-16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <div>
           <h1>Café del Dormilón</h1>
-          <p class="sub">Pedidos · <span id="hoy"></span></p>
+          <p class="sub"><span id="vname">Pedidos de café</span> · <span id="hoy"></span></p>
         </div>
       </div>
       <div class="views" role="toolbar" aria-label="Qué estás viendo">
         <button class="view" data-v="cafe" aria-pressed="true">Café</button>
-        <button class="view" data-v="acc" aria-pressed="false">Accesorios e insumos</button>
+        <button class="view" data-v="acc" aria-pressed="false">Accesorios</button>
+        <button class="view" data-v="met" aria-pressed="false">Métricas</button>
       </div>
       <div class="stats" aria-live="polite">
         <div class="stat">
@@ -244,7 +281,7 @@ textarea{min-height:76px;resize:vertical}
   </header>
 
   <div class="wrap">
-    <label class="searchbox">
+    <label class="searchbox" id="searchbox">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
       <input class="search" id="q" type="search" placeholder="Buscar cliente o producto" aria-label="Buscar">
     </label>
@@ -262,7 +299,25 @@ textarea{min-height:76px;resize:vertical}
       <button class="tab" data-f="anulados" aria-pressed="false">Anulados <span class="n" data-n="anulados"></span></button>
       <button class="tab" data-f="historial" aria-pressed="false">Historial de productos <span class="n" data-n="historial"></span></button>
     </div>
+    <div class="tabs" id="tabs-per" role="toolbar" aria-label="Período" hidden>
+      <button class="tab" data-p="mes" aria-pressed="true">Este mes</button>
+      <button class="tab" data-p="pasado" aria-pressed="false">Mes pasado</button>
+      <button class="tab" data-p="3m" aria-pressed="false">Últimos 3 meses</button>
+      <button class="tab" data-p="anio" aria-pressed="false">Este año</button>
+    </div>
     <section class="list" id="list" aria-live="polite"></section>
+    <section id="metrics" hidden>
+      <div class="kpis" id="m-kpis"></div>
+      <div class="panel">
+        <h2>Ventas</h2>
+        <p class="hint" id="m-chart-hint"></p>
+        <div class="legend"><span><i style="background:var(--c-cafe)"></i>Café</span><span><i style="background:var(--c-acc)"></i>Accesorios e insumos</span></div>
+        <div class="chart" id="m-chart"></div>
+        <details><summary>Ver como tabla</summary><div id="m-table"></div></details>
+      </div>
+      <div class="ranks" id="m-ranks"></div>
+      <p class="sync">Cuenta los pedidos no anulados según el día en que se registraron.</p>
+    </section>
     <p class="sync"><span id="sync">Conectando…</span><br><button class="linkbtn" id="logout">Cerrar sesión</button></p>
   </div>
 </main>
@@ -391,7 +446,8 @@ const grams = o => (o.items||[]).reduce((a,i)=>a+(+i.cant||0)*gramsOf(i.tam),0);
 
 let orders = [], filter = "activos", editing = null, db = null;
 let accs = [], accFilter = "activos", accEditing = null, view = "cafe";
-try{ if(localStorage.getItem("vista")==="acc") view = "acc"; }catch{}
+let period = "mes";
+try{ const v = localStorage.getItem("vista"); if(v==="acc"||v==="met") view = v; }catch{}
 
 $("#hoy").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"});
 
@@ -488,7 +544,7 @@ function subscribe(){
 /* ---------- sesión ---------- */
 let started = false;
 function showApp(on){
-  $("#login").hidden = on; $("#app").hidden = !on; $("#nuevo").hidden = !on;
+  $("#login").hidden = on; $("#app").hidden = !on; $("#nuevo").hidden = !on || view==="met";
   if(on && !started){ started = true; loadAll(); subscribe(); loadAcc(); subscribeAcc(); }
 }
 sb.auth.getSession().then(({data}) => { me = data.session?.user?.email || null; showApp(!!data.session); });
@@ -506,7 +562,7 @@ $("#loginform").addEventListener("submit", async e=>{
 $("#logout").onclick = ()=>sb.auth.signOut();
 
 /* ---------- render ---------- */
-function render(){ view==="acc" ? renderAcc() : renderCafe(); }
+function render(){ view==="acc" ? renderAcc() : view==="met" ? renderMetrics() : renderCafe(); }
 function fillLists(){
   const cl = [...new Set([...orders, ...accs].map(o=>o.cliente).filter(Boolean))];
   $("#dl-clientes").innerHTML = cl.map(c=>`<option value="${esc(c)}">`).join("");
@@ -1087,18 +1143,158 @@ $("#aform").addEventListener("submit",e=>{
   $("#adlg").close();
 });
 
+/* ---------- métricas ---------- */
+const PERIODS = {mes:{n:1, off:0, prev:"el mes pasado"}, pasado:{n:1, off:1, prev:"el mes anterior"},
+  "3m":{n:3, off:0, prev:"los 3 meses anteriores"}, anio:{n:12, off:0, prev:"el año pasado"}};
+const addMonths = (d,n) => new Date(d.getFullYear(), d.getMonth()+n, 1);
+const compact = n => n>=1e6 ? "$"+(n/1e6).toLocaleString("es-CO",{maximumFractionDigits:1})+" M" : n>=1e3 ? "$"+Math.round(n/1e3)+" mil" : "$"+Math.round(n);
+// [inicio, fin) del período y el mismo tramo del período anterior (si va en curso, solo los días ya corridos)
+function ranges(p){
+  const P = PERIODS[p], now = new Date(), m0 = new Date(now.getFullYear(), now.getMonth(), 1);
+  const start = p==="anio" ? new Date(now.getFullYear(),0,1) : addMonths(m0, -(P.n-1)-P.off);
+  const end = p==="anio" ? new Date(now.getFullYear()+1,0,1) : addMonths(start, P.n);
+  const cut = end > now ? now : end;
+  const back = d => { const x = new Date(d); x.setMonth(x.getMonth()-P.n); return x; };
+  return {start, end, prev:[back(start), back(cut)]};
+}
+const inRange = (o,a,b) => { const d = new Date(o.creado||0); return d>=a && d<b; };
+function stats(a,b){
+  const cs = orders.filter(o=>o.estado!=="anulado" && inRange(o,a,b));
+  const as = accs.filter(o=>o.estado!=="anulado" && inRange(o,a,b));
+  const vc = cs.reduce((s,o)=>s+total(o),0), va = as.reduce((s,o)=>s+accSale(o),0), ca = as.reduce((s,o)=>s+accCost(o),0);
+  const n = cs.length + as.length;
+  return {cs, as, vc, va, ventas:vc+va, n, ticket:n ? (vc+va)/n : 0, g:cs.reduce((s,o)=>s+grams(o),0), gan:va-ca, margen:marginFor(ca,va)};
+}
+function delta(cur, prev, label){
+  if(!prev) return cur ? `Sin datos de ${label}` : "Sin movimiento";
+  const d = Math.round((cur-prev)/prev*100);
+  return d===0 ? `Igual que ${label}` : `${d>0?"▲":"▼"} ${Math.abs(d)} % vs ${label}`;
+}
+function topBy(rows, n=5){ return [...rows.entries()].sort((a,b)=>b[1].v-a[1].v).slice(0,n); }
+function rankPanel(title, hint, rows, color, fmt){
+  const max = rows.length ? rows[0][1].v : 0;
+  return `<div class="panel"><h2>${title}</h2><p class="hint">${hint}</p>${rows.length
+    ? `<ol class="rank">${rows.map(([name,r])=>`<li><span class="rn" title="${esc(name)}">${esc(name)}</span><span class="rv">${fmt(r)}</span><span class="bar" aria-hidden="true"><span style="width:${max?r.v/max*100:0}%;background:${color}"></span></span></li>`).join("")}</ol>`
+    : `<p class="rank-empty">Nada en este período.</p>`}</div>`;
+}
+
+function renderMetrics(){
+  const P = PERIODS[period], {start, end, prev} = ranges(period);
+  const s = stats(start, end), p = stats(prev[0], prev[1]);
+  const debenC = orders.filter(o=>!o.pagado && o.estado!=="anulado"), debenA = accs.filter(o=>!o.pagado && o.estado!=="anulado");
+  const debe = debenC.reduce((a,o)=>a+total(o),0) + debenA.reduce((a,o)=>a+accSale(o),0), nd = debenC.length + debenA.length;
+  $("#st-k1").textContent = "Ventas"; $("#st-k2").textContent = "Te deben";
+  $("#st-kg").textContent = money(s.ventas);
+  $("#st-kg-s").textContent = s.ventas ? `Café ${compact(s.vc)} · accesorios ${compact(s.va)}` : "Sin ventas en este período";
+  $("#st-debe").textContent = money(debe);
+  $("#st-debe-s").textContent = nd ? `${nd} ${nd===1?"pedido":"pedidos"} por cobrar, café y accesorios` : "Todo está pagado";
+
+  const kpi = (k,v,d) => `<div class="kpi"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`;
+  $("#m-kpis").innerHTML =
+    kpi("Pedidos", s.n, delta(s.n, p.n, P.prev)) +
+    kpi("Ticket promedio", money(s.ticket), delta(s.ticket, p.ticket, P.prev)) +
+    kpi("Café vendido", kg(s.g)+" kg", delta(s.g, p.g, P.prev)) +
+    kpi("Ganancia accesorios", money(s.gan), s.va ? `Margen promedio ${pct(s.margen)}` : delta(s.gan, p.gan, P.prev));
+
+  // ventas por semana (un mes) o por mes (varios meses)
+  const buckets = [];
+  if(P.n===1){
+    const last = new Date(end - 864e5).getDate(), mes = start.toLocaleDateString("es-CO",{month:"short"}).replace(".","");
+    for(let d=1; d<=last; d+=7){
+      const e = Math.min(d+6, last);
+      buckets.push({label:`${d}–${e}`, full:`Del ${d} al ${e} de ${mes}`, a:new Date(start.getFullYear(), start.getMonth(), d), b:new Date(start.getFullYear(), start.getMonth(), e+1)});
+    }
+  } else for(let m=start; m<end; m=addMonths(m,1)){
+    buckets.push({label:m.toLocaleDateString("es-CO",{month:"short"}).replace(".",""), full:m.toLocaleDateString("es-CO",{month:"long",year:"numeric"}), a:m, b:addMonths(m,1)});
+  }
+  buckets.forEach(k=>{
+    k.cafe = s.cs.filter(o=>inRange(o,k.a,k.b)).reduce((a,o)=>a+total(o),0);
+    k.acc = s.as.filter(o=>inRange(o,k.a,k.b)).reduce((a,o)=>a+accSale(o),0);
+  });
+  $("#m-chart-hint").textContent = P.n===1 ? "Por semana del mes" : "Por mes";
+  lastBuckets = buckets; drawChart();
+  $("#m-table").innerHTML = `<table><thead><tr><th>${P.n===1?"Semana":"Mes"}</th><th>Café</th><th>Accesorios</th><th>Total</th></tr></thead><tbody>${
+    buckets.map(k=>`<tr><td>${esc(k.full)}</td><td>${money(k.cafe)}</td><td>${money(k.acc)}</td><td>${money(k.cafe+k.acc)}</td></tr>`).join("")}</tbody></table>`;
+
+  // rankings
+  const cafes = new Map(), pres = new Map(), acc = new Map(), cli = new Map();
+  const bump = (m,k,v,extra={}) => { const r = m.get(k) || {v:0, n:0, x:0}; r.v += v; r.n++; Object.entries(extra).forEach(([a,b])=>r[a]=(r[a]||0)+b); m.set(k,r); };
+  s.cs.forEach(o=>{
+    (o.items||[]).forEach(i=>{
+      bump(cafes, i.prod||"Café", (+i.cant||0)*gramsOf(i.tam), {x:(+i.cant||0)*(+i.precio||0)});
+      const t = LEGACY[i.tam]||i.tam; bump(pres, (SIZE_LABEL[t]||[t])[0], +i.cant||0);
+    });
+    if(o.cliente) bump(cli, o.cliente, total(o));
+  });
+  s.as.forEach(o=>{
+    (o.items||[]).forEach(i=>bump(acc, i.prod, (+i.cant||0)*((+i.precio||0)-(+i.costo||0)), {x:+i.cant||0}));
+    if(o.cliente) bump(cli, o.cliente, accSale(o));
+  });
+  $("#m-ranks").innerHTML =
+    rankPanel("Cafés más vendidos", "Por kilos", topBy(cafes), "var(--c-cafe)", r=>`${kg(r.v)} kg<small>${money(r.x)}</small>`) +
+    rankPanel("Presentaciones", "Unidades vendidas", topBy(pres), "var(--c-cafe)", r=>`${r.v} ${r.v===1?"unidad":"unidades"}`) +
+    rankPanel("Accesorios que más dejan", "Por ganancia", topBy(acc), "var(--c-acc)", r=>`${money(r.v)}<small>${r.x} ${r.x===1?"unidad":"unidades"}</small>`) +
+    rankPanel("Mejores clientes", "Por compras, café y accesorios", topBy(cli), "var(--c-cli)", r=>`${money(r.v)}<small>${r.n} ${r.n===1?"pedido":"pedidos"}</small>`);
+}
+
+let lastBuckets = [];
+function drawChart(){
+  const el = $("#m-chart"), B = lastBuckets;
+  if(!B.some(k=>k.cafe||k.acc)){ el.innerHTML = `<p class="rank-empty">Sin ventas en este período.</p>`; return; }
+  const W = Math.max(280, el.clientWidth), H = 200, L = 46, R = 4, T = 8, Bt = 24, ih = H-T-Bt;
+  const raw = Math.max(...B.map(k=>k.cafe+k.acc)), mag = 10**Math.floor(Math.log10(raw));
+  const max = [1,2,2.5,5,10].map(f=>f*mag).find(v=>v>=raw);
+  const band = (W-L-R)/B.length, bw = Math.min(36, band*.6), y = v => T + ih - v/max*ih;
+  const seg = (x,y0,h,top,c) => h<=0 ? "" : top
+    ? `<path d="M${x},${y0+h}V${y0+Math.min(4,h)}q0,-${Math.min(4,h)} ${Math.min(4,h)},-${Math.min(4,h)}H${x+bw-Math.min(4,h)}q${Math.min(4,h)},0 ${Math.min(4,h)},${Math.min(4,h)}V${y0+h}Z" fill="${c}"/>`
+    : `<rect x="${x}" y="${y0}" width="${bw}" height="${h}" fill="${c}"/>`;
+  let g = "";
+  [0, .5, 1].forEach(f=>{ const yy = y(max*f); g += `<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"${f?` stroke-dasharray="2 3"`:""}/><text x="${L-8}" y="${yy+4}" text-anchor="end">${compact(max*f)}</text>`; });
+  B.forEach((k,i)=>{
+    const x = L + band*i + (band-bw)/2, hc = k.cafe/max*ih, ha = k.acc/max*ih;
+    const gap = hc && ha ? 2 : 0;
+    g += seg(x, T+ih-hc, hc, !ha, "var(--c-cafe)");
+    g += seg(x, T+ih-hc-ha, Math.max(0, ha-gap), true, "var(--c-acc)");
+    g += `<text x="${x+bw/2}" y="${H-6}" text-anchor="middle">${esc(k.label)}</text>`;
+    g += `<rect class="hit" data-i="${i}" x="${L+band*i}" y="${T}" width="${band}" height="${ih+Bt}" fill="transparent"/>`;
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Ventas por ${PERIODS[period].n===1?"semana":"mes"}, café y accesorios">${g}</svg><div class="tip" hidden></div>`;
+  const tip = el.querySelector(".tip");
+  const show = e => {
+    const r = e.target.closest(".hit"); if(!r){ tip.hidden = true; return; }
+    const k = B[+r.dataset.i];
+    tip.innerHTML = `<b>${esc(k.full)}</b><i style="background:var(--c-cafe)"></i>Café ${money(k.cafe)}<br><i style="background:var(--c-acc)"></i>Accesorios ${money(k.acc)}<br>Total ${money(k.cafe+k.acc)}`;
+    tip.hidden = false;
+    const cx = L + band*(+r.dataset.i) + band/2, w = tip.offsetWidth;
+    tip.style.left = Math.min(Math.max(0, cx*el.clientWidth/W - w/2), el.clientWidth - w) + "px";
+  };
+  el.onpointermove = show; el.onpointerdown = show;
+  el.onpointerleave = ()=>{ tip.hidden = true; };
+}
+let rz = 0;
+addEventListener("resize", ()=>{ if(view!=="met") return; cancelAnimationFrame(rz); rz = requestAnimationFrame(drawChart); });
+
 /* ---------- vistas y filtros ---------- */
+const VIEW_NAME = {cafe:"Pedidos de café", acc:"Accesorios e insumos", met:"Métricas"};
 function setView(v){
   view = v;
   try{ localStorage.setItem("vista", v); }catch{}
   document.querySelectorAll(".view").forEach(b=>b.setAttribute("aria-pressed", b.dataset.v===v));
-  $("#tabs-cafe").hidden = v!=="cafe"; $("#tabs-acc").hidden = v!=="acc";
+  $("#tabs-cafe").hidden = v!=="cafe"; $("#tabs-acc").hidden = v!=="acc"; $("#tabs-per").hidden = v!=="met";
+  $("#searchbox").hidden = $("#list").hidden = v==="met"; $("#metrics").hidden = v!=="met";
+  if(started) $("#nuevo").hidden = v==="met";
+  $("#vname").textContent = VIEW_NAME[v];
   $("#q").placeholder = v==="acc" ? "Buscar cliente, producto o proveedor" : "Buscar cliente o producto";
   render();
 }
+document.querySelectorAll("#tabs-per .tab").forEach(b=>b.onclick=()=>{
+  period = b.dataset.p;
+  document.querySelectorAll("#tabs-per .tab").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  render();
+});
 document.querySelectorAll(".view").forEach(b=>b.onclick=()=>setView(b.dataset.v));
 $("#nuevo").onclick = ()=> view==="acc" ? openAccForm() : openForm();
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+document.querySelectorAll("#tabs-cafe .tab, #tabs-acc .tab").forEach(b=>b.onclick=()=>{
   const bar = b.parentElement;
   if(bar.id==="tabs-acc") accFilter = b.dataset.f; else filter = b.dataset.f;
   bar.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-pressed", x===b));
