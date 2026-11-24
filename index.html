@@ -90,6 +90,8 @@ body:has(#login:not([hidden])){background:var(--band)}
 .ic.go-ic{background:var(--ok-bg);color:var(--ok-ink)}
 .ic.late-ic{background:var(--due-bg);color:var(--due-ink)}
 .ic.cash-ic{background:var(--soft);color:var(--r3)}
+.ic.cat-ic{background:var(--soft);color:var(--ink)}
+.today .catalog{margin-top:10px}
 .task .tx{flex:1;min-width:0}
 .task .tt{font-weight:800;overflow-wrap:anywhere}
 .task .ts{font-size:.86rem;font-weight:600;color:var(--muted);overflow-wrap:anywhere}
@@ -483,6 +485,8 @@ const GRINDS = ["Grano","Molido fino","Molido medio","Molido grueso"];
 const GRIND_LABEL = {"Grano":"Grano","Molido fino":"Fino","Molido medio":"Medio","Molido grueso":"Grueso"};
 const BATCH_KG = 2, LOSS = 0.16;
 
+// catálogo público para clientes (carpeta catalogo/ del mismo sitio)
+const CATALOG_URL = new URL("catalogo/", location.href).href;
 const ICON_WA = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 10c0 3 2 5 5 5l1-1.5-2-1-1 .8c-.8-.4-1.4-1-1.8-1.8l.8-1-1-2z"/></svg>`;
 const ICON_EDIT = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>`;
 const ICON_NOTE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5"/></svg>`;
@@ -686,8 +690,22 @@ function renderHoy(){
   }
 
   $("#today").innerHTML = `<h2><span>Para hoy</span><span>${T.length||""}</span></h2>` + (T.length ? T.join("")
-    : `<div class="allgood"><b>Todo al día</b>No hay nada por tostar, pedir, entregar ni cobrar.</div>`);
+    : `<div class="allgood"><b>Todo al día</b>No hay nada por tostar, pedir, entregar ni cobrar.</div>`)
+    + `<h2 class="catalog"><span>Para clientes</span></h2>`
+    + task("cat-ic", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6M9 12h4"/></svg>`,
+      "Catálogo de métodos y accesorios", "Combos con café, fotos, precios y pedido por WhatsApp",
+      `<button class="btn" id="cat-share" onclick="shareCatalog(this)">Compartir</button><a class="btn ghost" href="${CATALOG_URL}" target="_blank" rel="noopener">Ver</a>`);
   fillLists();
+}
+async function shareCatalog(b){
+  const data = {title:"Catálogo · Café del Dormilón", text:"Mira nuestro catálogo de café, métodos y accesorios:", url:CATALOG_URL};
+  if(navigator.share){
+    try{ await navigator.share(data); }catch(e){ /* el usuario cerró el menú de compartir */ }
+    return;
+  }
+  try{ await navigator.clipboard.writeText(CATALOG_URL); b.textContent = "Enlace copiado"; }
+  catch(e){ window.prompt("Copia el enlace del catálogo:", CATALOG_URL); return; }
+  setTimeout(()=>{ b.textContent = "Compartir"; }, 2500);
 }
 function goTo(v, f){
   if(v==="cafe"){ filter = f; document.querySelectorAll("#tabs-cafe .tab").forEach(x=>x.setAttribute("aria-pressed", x.dataset.f===f)); }
