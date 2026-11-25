@@ -103,6 +103,18 @@ window.PRODUCTOS = [
   "f": "fotos/prensa-francesa-madera-600-ml.jpg"
  },
  {
+  "n": "Set Origami con Taza de Colores",
+  "c": "Métodos de preparación",
+  "p": 74300,
+  "f": "fotos/set-origami-con-taza-de-colores.jpg"
+ },
+ {
+  "n": "Set Origami con Taza de Hojas",
+  "c": "Métodos de preparación",
+  "p": 74300,
+  "f": "fotos/set-origami-con-taza-de-hojas.jpg"
+ },
+ {
   "n": "Set Pour-Over Cerámica (V60 + jarra)",
   "c": "Métodos de preparación",
   "p": 85800,
