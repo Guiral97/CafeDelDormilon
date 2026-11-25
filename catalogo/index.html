@@ -300,7 +300,7 @@ list.addEventListener("click", e => {
 // Catálogo
 let active = "Todo";
 const chips = document.getElementById("chips");
-chips.innerHTML = ["Todo", ...CATS.map(c => c[0])].map(c => `<button type="button" data-c="${c}" aria-pressed="${c === active}">${c}</button>`).join("");
+chips.innerHTML = ["Todo", ...CATS.filter(c => P.some(p => p.c === c[0])).map(c => c[0])].map(c => `<button type="button" data-c="${c}" aria-pressed="${c === active}">${c}</button>`).join("");
 chips.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   active = b.dataset.c;

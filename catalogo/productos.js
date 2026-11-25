@@ -1,12 +1,6 @@
 // Generado por catalogo_clientes.py (cafe-del-dormilon). No editar a mano.
 window.PRODUCTOS = [
  {
-  "n": "Báscula Barista con Temporizador",
-  "c": "Accesorios barista",
-  "p": 42900,
-  "f": "fotos/bascula-barista-con-temporizador.jpg"
- },
- {
   "n": "Cuchara Medidora con Clip",
   "c": "Accesorios barista",
   "p": 7200,
@@ -61,12 +55,6 @@ window.PRODUCTOS = [
   "f": "fotos/molino-vintage-de-madera.jpg"
  },
  {
-  "n": "Cafetera Moka Acero 4 tazas",
-  "c": "Métodos de preparación",
-  "p": 35800,
-  "f": "fotos/cafetera-moka-acero-4-tazas.jpg"
- },
- {
   "n": "Cafetera Moka Clásica 3 tazas",
   "c": "Métodos de preparación",
   "p": 28600,
@@ -83,12 +71,6 @@ window.PRODUCTOS = [
   "c": "Métodos de preparación",
   "p": 85800,
   "f": "fotos/chemex-de-madera-600-ml.jpg"
- },
- {
-  "n": "Gotero Origami",
-  "c": "Métodos de preparación",
-  "p": 35800,
-  "f": "fotos/gotero-origami.jpg"
  },
  {
   "n": "Gotero V60 Base de Madera",
@@ -209,11 +191,5 @@ window.PRODUCTOS = [
   "c": "Termos y vasos coffee",
   "p": 40000,
   "f": "fotos/vaso-termico-coffee-500-ml.jpg"
- },
- {
-  "n": "Tetera Cuello de Ganso 350 ml",
-  "c": "Teteras",
-  "p": 54300,
-  "f": "fotos/tetera-cuello-de-ganso-350-ml.jpg"
  }
 ];
